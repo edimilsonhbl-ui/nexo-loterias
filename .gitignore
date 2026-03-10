@@ -1,0 +1,28 @@
+# Flutter
+nexo_loterias/.dart_tool/
+nexo_loterias/build/
+nexo_loterias/.flutter-plugins
+nexo_loterias/.flutter-plugins-dependencies
+nexo_loterias/.pub-cache/
+nexo_loterias/.pub/
+nexo_loterias/android/.gradle/
+nexo_loterias/android/local.properties
+nexo_loterias/android/key.properties
+nexo_loterias/ios/Pods/
+nexo_loterias/ios/.symlinks/
+nexo_loterias/ios/Flutter/flutter_export_environment.sh
+nexo_loterias/coverage/
+
+# Firebase — NUNCA commitar arquivos de credenciais
+nexo_loterias/android/app/google-services.json
+nexo_loterias/ios/Runner/GoogleService-Info.plist
+nexo_loterias/lib/firebase_options.dart
+
+# Firebase Functions
+functions/node_modules/
+functions/lib/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+*.log
