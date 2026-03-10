@@ -1,21 +1,18 @@
 /**
  * syncResultadosMegaSena
  *
- * Roda automaticamente via Cloud Scheduler (a cada 30 min nos dias de sorteio:
- * quarta e sábado).
+ * Roda via Cloud Scheduler: quarta e sábado às 21h (horário de Brasília).
+ * Consulta a API pública da Caixa, verifica se o concurso já existe no
+ * Firestore e salva se for novo.
  *
- * Fluxo:
- *  1. Consulta a API pública da Caixa (resultados.caixa.gov.br) para obter o
- *     último concurso da Mega-Sena.
- *  2. Verifica se o concurso já existe em /concursos/{id}.
- *  3. Se for novo, salva o documento e dispara conferirApostasPendentes e
- *     gerarEstatisticas via Pub/Sub.
- *
- * TODO: implementar fetch à API real antes de ir para produção.
+ * Os triggers onDocumentCreated de conferirApostasPendentes,
+ * gerarEstatisticas e enviarNotificacaoResultado disparam automaticamente
+ * após o set.
  */
 
 import * as functions from "firebase-functions/v2";
 import * as admin from "firebase-admin";
+import { buscarUltimoResultado } from "./caixaApi";
 
 if (admin.apps.length === 0) admin.initializeApp();
 
@@ -23,30 +20,26 @@ const db = admin.firestore();
 
 export const syncResultadosMegaSena = functions.scheduler.onSchedule(
   {
-    schedule: "every 30 minutes",
+    schedule: "0 21 * * 3,6", // quarta (3) e sábado (6) às 21h
     timeZone: "America/Sao_Paulo",
+    retryCount: 2,
+    timeoutSeconds: 60,
   },
   async () => {
     functions.logger.info("[syncResultadosMegaSena] Iniciando sincronização...");
 
-    // ------------------------------------------------------------------
-    // STUB — substitua este bloco pela chamada real à API da Caixa.
-    // Estrutura esperada do objeto `resultado`:
-    // {
-    //   numeroConcurso: number,
-    //   dataSorteio: string (ISO 8601),
-    //   dezenasSorteadas: string[],
-    //   premioEstimado: number,
-    //   acumulou: boolean,
-    // }
-    // ------------------------------------------------------------------
-    const resultado = {
-      numeroConcurso: 0,
-      dataSorteio: new Date().toISOString(),
-      dezenasSorteadas: [] as string[],
-      premioEstimado: 0,
-      acumulou: false,
-    };
+    let resultado;
+    try {
+      resultado = await buscarUltimoResultado("megasena");
+    } catch (err) {
+      functions.logger.error("[syncResultadosMegaSena] Erro ao consultar API da Caixa:", err);
+      return;
+    }
+
+    if (!resultado.numeroConcurso) {
+      functions.logger.error("[syncResultadosMegaSena] API retornou concurso inválido (numero=0).");
+      return;
+    }
 
     const concursoId = `megasena_${resultado.numeroConcurso}`;
     const ref = db.collection("concursos").doc(concursoId);
@@ -70,7 +63,7 @@ export const syncResultadosMegaSena = functions.scheduler.onSchedule(
     });
 
     functions.logger.info(
-      `[syncResultadosMegaSena] Concurso ${resultado.numeroConcurso} salvo com sucesso.`
+      `[syncResultadosMegaSena] Concurso ${resultado.numeroConcurso} salvo — dezenas: ${resultado.dezenasSorteadas.join(", ")}`
     );
   }
 );

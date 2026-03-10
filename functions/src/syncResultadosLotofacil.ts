@@ -1,16 +1,13 @@
 /**
  * syncResultadosLotofacil
  *
- * Roda automaticamente via Cloud Scheduler (segunda a sábado às 21h,
- * horário de Brasília).
- *
- * Fluxo idêntico ao syncResultadosMegaSena, mas para a Lotofácil.
- *
- * TODO: implementar fetch à API real antes de ir para produção.
+ * Roda via Cloud Scheduler: segunda a sábado às 21h (horário de Brasília).
+ * Lógica idêntica ao syncResultadosMegaSena — apenas o endpoint muda.
  */
 
 import * as functions from "firebase-functions/v2";
 import * as admin from "firebase-admin";
+import { buscarUltimoResultado } from "./caixaApi";
 
 if (admin.apps.length === 0) admin.initializeApp();
 
@@ -18,22 +15,26 @@ const db = admin.firestore();
 
 export const syncResultadosLotofacil = functions.scheduler.onSchedule(
   {
-    schedule: "every 60 minutes",
+    schedule: "0 21 * * 1-6", // segunda (1) a sábado (6) às 21h
     timeZone: "America/Sao_Paulo",
+    retryCount: 2,
+    timeoutSeconds: 60,
   },
   async () => {
     functions.logger.info("[syncResultadosLotofacil] Iniciando sincronização...");
 
-    // ------------------------------------------------------------------
-    // STUB — substitua este bloco pela chamada real à API da Caixa.
-    // ------------------------------------------------------------------
-    const resultado = {
-      numeroConcurso: 0,
-      dataSorteio: new Date().toISOString(),
-      dezenasSorteadas: [] as string[],
-      premioEstimado: 0,
-      acumulou: false,
-    };
+    let resultado;
+    try {
+      resultado = await buscarUltimoResultado("lotofacil");
+    } catch (err) {
+      functions.logger.error("[syncResultadosLotofacil] Erro ao consultar API da Caixa:", err);
+      return;
+    }
+
+    if (!resultado.numeroConcurso) {
+      functions.logger.error("[syncResultadosLotofacil] API retornou concurso inválido (numero=0).");
+      return;
+    }
 
     const concursoId = `lotofacil_${resultado.numeroConcurso}`;
     const ref = db.collection("concursos").doc(concursoId);
@@ -57,7 +58,7 @@ export const syncResultadosLotofacil = functions.scheduler.onSchedule(
     });
 
     functions.logger.info(
-      `[syncResultadosLotofacil] Concurso ${resultado.numeroConcurso} salvo com sucesso.`
+      `[syncResultadosLotofacil] Concurso ${resultado.numeroConcurso} salvo — dezenas: ${resultado.dezenasSorteadas.join(", ")}`
     );
   }
 );

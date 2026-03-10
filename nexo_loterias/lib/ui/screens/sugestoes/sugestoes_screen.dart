@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/modalidade_provider.dart';
 import '../../../providers/aposta_provider.dart';
+import '../../../providers/estatisticas_provider.dart';
 import '../../../data/services/sugestoes_service.dart';
 import '../../../core/utils/probabilidade_util.dart';
 import '../../../data/models/aposta.dart';
@@ -26,14 +27,26 @@ class _SugestoesScreenState extends State<SugestoesScreen> {
   List<int> _numerosGerados = [];
   String _perfil = '';
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final modalidadeId = context.read<ModalidadeProvider>().modalidadeAtual.id;
+      context.read<EstatisticasProvider>().carregar(modalidadeId);
+    });
+  }
+
   void _gerar() {
     final modalidade = context.read<ModalidadeProvider>().modalidadeAtual;
+    final estatisticas = context.read<EstatisticasProvider>().estatisticas;
     final nums = _service.gerar(
       modalidade: modalidade,
       tipo: _tipo,
       evitarSequencias: _evitarSequencias,
       equilibrarParesImpares: _equilibrarPares,
       equilibrarAltasBaixas: _equilibrarAltasBaixas,
+      estatisticas: estatisticas,
     );
     setState(() {
       _numerosGerados = nums;

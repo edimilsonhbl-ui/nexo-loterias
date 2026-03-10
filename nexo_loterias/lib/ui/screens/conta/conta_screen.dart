@@ -35,14 +35,18 @@ class _ContaScreenState extends State<ContaScreen>
     if (!_formKey.currentState!.validate()) return;
     final auth = context.read<AuthProvider>();
     final ok = await auth.entrar(email: _emailCtrl.text, senha: _senhaCtrl.text);
-    if (ok && mounted) Navigator.pop(context);
+    if (ok && mounted) {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 
   Future<void> _cadastrar() async {
     if (!_formKey.currentState!.validate()) return;
     final auth = context.read<AuthProvider>();
     final ok = await auth.cadastrar(email: _emailCtrl.text, senha: _senhaCtrl.text);
-    if (ok && mounted) Navigator.pop(context);
+    if (ok && mounted) {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
   }
 
   Future<void> _redefinirSenha() async {
@@ -67,7 +71,15 @@ class _ContaScreenState extends State<ContaScreen>
     final primary = Theme.of(context).colorScheme.primary;
 
     if (auth.estaLogado) {
-      return _TelaLogado(usuario: auth.usuario!.email ?? 'Usuário', onSair: auth.sair);
+      return _TelaLogado(
+        usuario: auth.usuario!.email ?? 'Usuário',
+        onSair: () async {
+          await auth.sair();
+          if (context.mounted) {
+            Navigator.pushReplacementNamed(context, '/conta');
+          }
+        },
+      );
     }
 
     return Scaffold(
@@ -245,7 +257,7 @@ class _FormularioAuth extends StatelessWidget {
 
 class _TelaLogado extends StatelessWidget {
   final String usuario;
-  final Future<void> Function() onSair;
+  final VoidCallback onSair;
 
   const _TelaLogado({required this.usuario, required this.onSair});
 

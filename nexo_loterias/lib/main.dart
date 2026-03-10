@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
 import 'core/routes/app_routes.dart';
 import 'providers/modalidade_provider.dart';
@@ -17,6 +18,10 @@ import 'data/services/fcm_service.dart';
 
 final _fcmService = FcmService();
 
+/// Chave global para acessar o Navigator fora da árvore de widgets
+/// (necessário para exibir SnackBar a partir de callbacks FCM).
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -27,14 +32,47 @@ void main() async {
   // antes da UI estar visível (experiência ruim especialmente no iOS).
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     await _fcmService.inicializar(
-      onMensagem: (msg) => debugPrint('FCM Foreground: ${msg.notification?.title}'),
-      onMensagemAberta: (msg) => debugPrint('FCM Aberta: ${msg.notification?.title}'),
+      onMensagem: _onFcmForeground,
+      onMensagemAberta: _onFcmAberta,
     );
     await _fcmService.assinarAcumulados();
     await _fcmService.assinarNovos();
   });
 
   runApp(const NexoApp());
+}
+
+/// Exibe SnackBar quando notificação chega com app em foreground.
+void _onFcmForeground(RemoteMessage msg) {
+  final titulo = msg.notification?.title ?? '';
+  final corpo = msg.notification?.body ?? '';
+  if (titulo.isEmpty) return;
+
+  final context = navigatorKey.currentContext;
+  if (context == null) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(titulo, style: const TextStyle(fontWeight: FontWeight.w700)),
+          if (corpo.isNotEmpty) Text(corpo, style: const TextStyle(fontSize: 13)),
+        ],
+      ),
+      duration: const Duration(seconds: 5),
+      behavior: SnackBarBehavior.floating,
+    ),
+  );
+}
+
+/// Navega para a tela correta quando o usuário toca na notificação.
+void _onFcmAberta(RemoteMessage msg) {
+  navigatorKey.currentState?.pushNamedAndRemoveUntil(
+    AppRoutes.home,
+    (route) => false,
+  );
 }
 
 class NexoApp extends StatelessWidget {
@@ -59,6 +97,7 @@ class NexoApp extends StatelessWidget {
           return MaterialApp(
             title: 'Nexo Loterias',
             debugShowCheckedModeBanner: false,
+            navigatorKey: navigatorKey,
             theme: modalidadeProvider.temaAtual,
             initialRoute: AppRoutes.splash,
             routes: AppRoutes.routes,

@@ -55,24 +55,6 @@ export const enviarNotificacaoResultado = functions.firestore.onDocumentCreated(
     );
 
     // Notificação principal para assinantes da modalidade.
-    await messaging.sendEachForMulticast({
-      tokens: [],          // Não é usado — usamos tópicos.
-      topic: modalidadeId, // Campo usado no envio por tópico abaixo.
-      notification: {
-        title: `${nomeModalidade} — Concurso ${numeroConcurso}`,
-        body: `Resultado: ${dezenas}`,
-      },
-      data: {
-        modalidadeId,
-        numeroConcurso: String(numeroConcurso),
-        dezenas,
-        acumulou: String(acumulou),
-      },
-    }).catch(() => {
-      // sendEachForMulticast não suporta `topic` — usar send com topic.
-    });
-
-    // Envio correto por tópico.
     await messaging.send({
       topic: modalidadeId,
       notification: {
@@ -86,8 +68,6 @@ export const enviarNotificacaoResultado = functions.firestore.onDocumentCreated(
         acumulou: String(acumulou),
       },
     });
-
-    // Notificação extra para o tópico "acumulados".
     if (acumulou) {
       await messaging.send({
         topic: "acumulados",
