@@ -1,4 +1,21 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "concursos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "modalidadeId", "order": "ASCENDING" },
+        { "fieldPath": "numeroConcurso", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "apostas_usuario",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "criadaEm", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }
