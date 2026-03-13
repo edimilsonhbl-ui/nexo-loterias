@@ -8,6 +8,8 @@ nexo_loterias/.pub/
 nexo_loterias/android/.gradle/
 nexo_loterias/android/local.properties
 nexo_loterias/android/key.properties
+nexo_loterias/android/*.jks
+nexo_loterias/android/*.keystore
 nexo_loterias/ios/Pods/
 nexo_loterias/ios/.symlinks/
 nexo_loterias/ios/Flutter/flutter_export_environment.sh

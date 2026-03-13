@@ -11,6 +11,8 @@ import '../../ui/screens/sugestoes/sugestoes_screen.dart';
 import '../../ui/screens/fechamento/fechamento_screen.dart';
 import '../../ui/screens/ia_nexo/ia_nexo_screen.dart';
 import '../../ui/screens/premium/premium_screen.dart';
+import '../../ui/screens/palpite_do_dia/palpite_do_dia_screen.dart';
+import '../../ui/screens/ranking/ranking_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -27,6 +29,8 @@ class AppRoutes {
   static const fechamento = '/fechamento';
   static const iaNexo = '/ia-nexo';
   static const premium = '/premium';
+  static const palpiteDoDia = '/palpite-do-dia';
+  static const ranking = '/ranking';
 
   static Map<String, WidgetBuilder> get routes => {
         splash: (_) => const SplashScreen(),
@@ -41,5 +45,7 @@ class AppRoutes {
         fechamento: (_) => const FechamentoScreen(),
         iaNexo: (_) => const IaNexoScreen(),
         premium: (_) => const PremiumScreen(),
+        palpiteDoDia: (_) => const PalpiteDoDialScreen(),
+        ranking: (_) => const RankingScreen(),
       };
 }

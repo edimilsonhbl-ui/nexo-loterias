@@ -5,6 +5,7 @@ import '../../../providers/concurso_provider.dart';
 import '../../../providers/premium_provider.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../widgets/banner_ad_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -239,8 +240,38 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
 
+            const SizedBox(height: 12),
+
+            // Linha 3 — Palpite do Dia + Ranking
+            Row(
+              children: [
+                Expanded(
+                  child: _ActionCard(
+                    icon: Icons.auto_awesome,
+                    label: 'Palpite\ndo Dia',
+                    color: primary,
+                    badge: 'PRO',
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.palpiteDoDia),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ActionCard(
+                    icon: Icons.emoji_events_outlined,
+                    label: 'Ranking\nde Sorte',
+                    color: primary,
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.ranking),
+                  ),
+                ),
+              ],
+            ),
+
             const SizedBox(height: 24),
             _AvisoLegalBanner(),
+            const SizedBox(height: 8),
+            if (!premium.isPremium) const BannerAdWidget(),
           ],
         ),
       ),

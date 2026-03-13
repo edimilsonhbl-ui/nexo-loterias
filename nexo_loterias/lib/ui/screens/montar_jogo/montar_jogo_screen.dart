@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../providers/modalidade_provider.dart';
 import '../../../providers/jogo_provider.dart';
 import '../../../providers/aposta_provider.dart';
@@ -40,7 +41,27 @@ class _MontarJogoScreenState extends State<MontarJogoScreen> {
     final probs = jogo.probabilidades;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Montar Jogo – ${modalidade.nome}')),
+      appBar: AppBar(
+        title: Text('Montar Jogo – ${modalidade.nome}'),
+        actions: [
+          if (jogo.numerosSelecionados.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.share_outlined),
+              tooltip: 'Compartilhar jogo',
+              onPressed: () {
+                final nums = jogo.numerosSelecionados.toList()..sort();
+                final str = nums
+                    .map((n) => n.toString().padLeft(2, '0'))
+                    .join(' · ');
+                Share.share(
+                  '🍀 Meu jogo ${modalidade.nome} no NEXO LOTERIAS\n\n'
+                  '$str\n\n'
+                  '📲 https://play.google.com/store/apps/details?id=com.nexoloterias.nexo_loterias',
+                );
+              },
+            ),
+        ],
+      ),
       body: Column(
         children: [
           Expanded(

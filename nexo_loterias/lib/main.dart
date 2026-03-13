@@ -14,7 +14,10 @@ import 'providers/fechamento_provider.dart';
 import 'providers/concurso_provider.dart';
 import 'providers/premium_provider.dart';
 import 'providers/ia_palpite_provider.dart';
+import 'providers/billing_provider.dart';
+import 'providers/ranking_provider.dart';
 import 'data/services/fcm_service.dart';
+import 'data/services/admob_service.dart';
 
 final _fcmService = FcmService();
 
@@ -27,6 +30,7 @@ void main() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await AdmobService().inicializar();
 
   // FCM é inicializado após o primeiro frame para evitar diálogo de permissão
   // antes da UI estar visível (experiência ruim especialmente no iOS).
@@ -91,6 +95,8 @@ class NexoApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FechamentoProvider()),
         ChangeNotifierProvider(create: (_) => ConcursoProvider()),
         ChangeNotifierProvider(create: (_) => IaPalpiteProvider()),
+        ChangeNotifierProvider(create: (_) => BillingProvider()),
+        ChangeNotifierProvider(create: (_) => RankingProvider()),
       ],
       child: Consumer<ModalidadeProvider>(
         builder: (context, modalidadeProvider, _) {

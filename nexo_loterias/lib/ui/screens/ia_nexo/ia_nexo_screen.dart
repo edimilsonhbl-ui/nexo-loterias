@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../providers/ia_palpite_provider.dart';
 import '../../../providers/modalidade_provider.dart';
 import '../../../providers/aposta_provider.dart';
@@ -51,6 +52,26 @@ class _IaNexoConteudo extends StatelessWidget {
             const Text('IA NEXO'),
           ],
         ),
+        actions: [
+          Consumer<IaPalpiteProvider>(
+            builder: (_, ia, __) => ia.palpiteAtual.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.share_outlined),
+                    tooltip: 'Compartilhar palpite',
+                    onPressed: () {
+                      final m = context.read<ModalidadeProvider>().modalidadeAtual;
+                      final nums = ia.palpiteAtual.toList()..sort();
+                      final str = nums.map((n) => n.toString().padLeft(2, '0')).join(' · ');
+                      Share.share(
+                        '🤖 Palpite da IA NEXO — ${m.nome}\n\n'
+                        '$str\n\n'
+                        '📲 https://play.google.com/store/apps/details?id=com.nexoloterias.nexo_loterias',
+                      );
+                    },
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

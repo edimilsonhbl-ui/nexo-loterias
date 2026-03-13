@@ -3,39 +3,28 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ── Usuários ──────────────────────────────────────────────────────────────
-    // O cliente pode ler e atualizar apenas seu próprio documento.
-    // Campos premium, plano e dataExpiracaoPremium só podem ser escritos
-    // por Cloud Functions (sem auth no contexto de admin SDK).
     match /usuarios/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
-
-      // Permite criar o próprio documento (cadastro).
       allow create: if request.auth != null && request.auth.uid == userId
         && !request.resource.data.keys().hasAny(['premium', 'plano', 'dataExpiracaoPremium']);
-
-      // Permite atualizar preferências, mas nunca campos de premium.
       allow update: if request.auth != null && request.auth.uid == userId
         && !request.resource.data.diff(resource.data).affectedKeys()
             .hasAny(['premium', 'plano', 'dataExpiracaoPremium']);
     }
 
     // ── Modalidades ───────────────────────────────────────────────────────────
-    // Leitura pública; escrita apenas por admin (Cloud Functions).
     match /modalidades/{modalidadeId} {
       allow read: if true;
       allow write: if false;
     }
 
     // ── Concursos ─────────────────────────────────────────────────────────────
-    // Leitura pública; escrita apenas por Cloud Functions.
     match /concursos/{concursoId} {
       allow read: if true;
       allow write: if false;
     }
 
     // ── Apostas do usuário ────────────────────────────────────────────────────
-    // O usuário lê e escreve apenas suas próprias apostas.
-    // O campo "acertos" é controlado pela Cloud Function conferirApostasPendentes.
     match /apostas_usuario/{apostaId} {
       allow read:   if request.auth != null
         && request.auth.uid == resource.data.userId;
@@ -51,10 +40,23 @@ service cloud.firestore {
     }
 
     // ── Estatísticas ─────────────────────────────────────────────────────────
-    // Leitura pública; escrita apenas por Cloud Functions.
     match /estatisticas/{modalidadeId} {
       allow read: if true;
       allow write: if false;
+    }
+
+    // ── Ranking de Sorte ─────────────────────────────────────────────────────
+    // Leitura pública. Usuário só cria entrada com seu próprio userId.
+    // Sem update/delete — entradas são imutáveis após registro.
+    match /ranking/{entryId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.userId
+        && request.resource.data.keys().hasAll(['userId', 'displayName', 'acertos', 'modalidadeId'])
+        && (request.resource.data.displayName is string)
+        && (request.resource.data.displayName.size() >= 2)
+        && (request.resource.data.acertos is int);
+      allow update, delete: if false;
     }
   }
 }

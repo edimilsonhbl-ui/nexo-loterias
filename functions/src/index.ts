@@ -9,3 +9,4 @@ export { syncResultadosLotofacil } from "./syncResultadosLotofacil";
 export { conferirApostasPendentes } from "./conferirApostasPendentes";
 export { gerarEstatisticas } from "./gerarEstatisticas";
 export { enviarNotificacaoResultado } from "./enviarNotificacaoResultado";
+export { validarPremium } from "./validarPremium";

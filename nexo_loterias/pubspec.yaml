@@ -34,6 +34,14 @@ dependencies:
   shimmer: ^3.0.0
   fl_chart: ^0.69.0
 
+  # Billing & Monetização
+  in_app_purchase: ^3.2.0
+  google_mobile_ads: ^5.1.0
+  cloud_functions: ^5.1.2
+
+  # Compartilhamento
+  share_plus: ^10.0.0
+
   # Utilidades
   intl: ^0.19.0
   uuid: ^4.5.1
