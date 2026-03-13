@@ -24,15 +24,62 @@ class _PremiumScreenState extends State<PremiumScreen> {
   // O fluxo abaixo usa `ativarPremiumDev` exclusivamente para testes/dev.
   // Em release use `const bool kIsProduction = bool.fromEnvironment('PRODUCTION');`
   // e desabilite este botão quando `kIsProduction == true`.
-  static const _isProduction = bool.fromEnvironment('PRODUCTION');
+  static const _isProduction = bool.fromEnvironment('PRODUCTION', defaultValue: true);
+
+  void _mostrarDialogoPagamento() {
+    final primary = Theme.of(context).colorScheme.primary;
+    final planoNome = _planoSelecionado == PlanoUsuario.mensal
+        ? 'Mensal — R\$ 9,90'
+        : _planoSelecionado == PlanoUsuario.anual
+            ? 'Anual — R\$ 59,90'
+            : 'Vitalício — R\$ 97,00';
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.star_rounded, color: primary),
+            const SizedBox(width: 8),
+            const Text('Assinar Premium'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Plano selecionado: $planoNome',
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 12),
+            const Text(
+              'O sistema de pagamento estará disponível em breve.\n\n'
+              'Para assinar agora, entre em contato:',
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.email_outlined, size: 18, color: primary),
+                const SizedBox(width: 8),
+                const Text('nexoloterias@gmail.com',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _assinar() async {
     if (_isProduction) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Integração de pagamento em breve. Aguarde!'),
-        ),
-      );
+      _mostrarDialogoPagamento();
       return;
     }
 
