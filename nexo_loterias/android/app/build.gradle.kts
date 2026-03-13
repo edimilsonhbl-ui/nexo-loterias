@@ -57,10 +57,22 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            packaging {
+                jniLibs {
+                    keepDebugSymbols += "**/*.so"
+                }
+            }
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+// Workaround: NDK 27 strip bug on Windows — Play Store strips .so on upload
+tasks.whenTaskAdded {
+    if (name.startsWith("strip") || name.startsWith("Strip")) {
+        enabled = false
+    }
 }
