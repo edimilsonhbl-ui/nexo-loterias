@@ -3,10 +3,10 @@
         android:label="NEXO LOTERIAS"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-        <!-- AdMob App ID (TESTE) — substitua após criar conta em https://admob.google.com -->
+        <!-- AdMob App ID NEXO LOTERIAS -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-5110454576194734~7653302576"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

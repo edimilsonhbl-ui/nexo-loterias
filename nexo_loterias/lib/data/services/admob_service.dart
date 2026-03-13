@@ -11,15 +11,15 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 //   3. Crie unidades de anúncio Banner e Intersticial
 //   4. Substitua os IDs abaixo
 class AdmobIds {
-  static const _isTest = true;
+  static const _isTest = false;
 
   static const String banner = _isTest
       ? 'ca-app-pub-3940256099942544/6300978111'
-      : 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+      : 'ca-app-pub-5110454576194734/2751349749';
 
   static const String intersticial = _isTest
       ? 'ca-app-pub-3940256099942544/1033173712'
-      : 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+      : 'ca-app-pub-5110454576194734/1626950275';
 }
 
 class AdmobService {
