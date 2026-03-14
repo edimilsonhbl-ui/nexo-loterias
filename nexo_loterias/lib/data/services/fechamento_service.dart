@@ -1,7 +1,7 @@
 import 'dart:math';
 import '../models/modalidade.dart';
 
-enum TipoFechamento { rapido, equilibrado, porOrcamento }
+enum TipoFechamento { rapido, equilibrado, porOrcamento, maximo, inteligente }
 
 class ResultadoFechamento {
   final List<List<int>> jogos;
@@ -37,11 +37,16 @@ class FechamentoService {
       case TipoFechamento.equilibrado:
         return _fechamentoEquilibrado(modalidade, numerosBase, qtdMinima, valorJogo);
       case TipoFechamento.porOrcamento:
-        return _fechamentoPorOrcamento(modalidade, numerosBase, qtdMinima, valorJogo, orcamento);
+        return _fechamentoPorOrcamento(
+            modalidade, numerosBase, qtdMinima, valorJogo, orcamento);
+      case TipoFechamento.maximo:
+        return _fechamentoMaximo(modalidade, numerosBase, qtdMinima, valorJogo);
+      case TipoFechamento.inteligente:
+        return _fechamentoInteligente(
+            modalidade, numerosBase, qtdMinima, valorJogo);
     }
   }
 
-  // Gera todas as combinacoes possiveis (limitado a 50 jogos)
   ResultadoFechamento _fechamentoRapido(
       Modalidade modalidade, List<int> base, int k, double valorJogo) {
     final combinacoes = <List<int>>[];
@@ -55,7 +60,6 @@ class FechamentoService {
     );
   }
 
-  // Gera combinacoes distribuindo os numeros de forma equilibrada
   ResultadoFechamento _fechamentoEquilibrado(
       Modalidade modalidade, List<int> base, int k, double valorJogo) {
     final jogos = <List<int>>[];
@@ -101,9 +105,8 @@ class FechamentoService {
     );
   }
 
-  // Gera o maximo de jogos dentro do orcamento informado
-  ResultadoFechamento _fechamentoPorOrcamento(
-      Modalidade modalidade, List<int> base, int k, double valorJogo, double orcamento) {
+  ResultadoFechamento _fechamentoPorOrcamento(Modalidade modalidade,
+      List<int> base, int k, double valorJogo, double orcamento) {
     final maxJogos = orcamento > 0 ? (orcamento / valorJogo).floor() : 10;
     final combinacoes = <List<int>>[];
     _combinar(base, k, 0, [], combinacoes, limite: maxJogos);
@@ -113,6 +116,67 @@ class FechamentoService {
       totalJogos: combinacoes.length,
       custoTotal: combinacoes.length * valorJogo,
       tipo: TipoFechamento.porOrcamento,
+      numerosBase: base,
+    );
+  }
+
+  /// Gera TODAS as combinações possíveis (até 200 jogos)
+  ResultadoFechamento _fechamentoMaximo(
+      Modalidade modalidade, List<int> base, int k, double valorJogo) {
+    final combinacoes = <List<int>>[];
+    _combinar(base, k, 0, [], combinacoes, limite: 200);
+    return ResultadoFechamento(
+      jogos: combinacoes,
+      totalJogos: combinacoes.length,
+      custoTotal: combinacoes.length * valorJogo,
+      tipo: TipoFechamento.maximo,
+      numerosBase: base,
+    );
+  }
+
+  /// Fechamento inteligente: garante cobertura máxima (cada número aparece
+  /// ao menos [k-1] vezes) com o menor número de jogos possível.
+  ResultadoFechamento _fechamentoInteligente(
+      Modalidade modalidade, List<int> base, int k, double valorJogo) {
+    final jogos = <List<int>>[];
+    final frequencia = {for (final n in base) n: 0};
+    const maxJogos = 100;
+    int tentativas = 0;
+
+    while (jogos.length < maxJogos && tentativas < 5000) {
+      tentativas++;
+
+      // Priorizar números menos usados
+      final ordenados = frequencia.entries.toList()
+        ..sort((a, b) {
+          final diff = a.value.compareTo(b.value);
+          return diff != 0 ? diff : _rng.nextInt(3) - 1;
+        });
+
+      final candidatos = ordenados.map((e) => e.key).toList();
+      final jogo = candidatos.take(k).toList()..sort();
+
+      if (jogo.length == k && !_jogoJaExiste(jogos, jogo)) {
+        jogos.add(jogo);
+        for (final n in jogo) {
+          frequencia[n] = (frequencia[n] ?? 0) + 1;
+        }
+
+        // Parar quando todos os números aparecerem pelo menos k-1 vezes
+        final minFreq = frequencia.values.reduce((a, b) => a < b ? a : b);
+        if (minFreq >= k - 1 && jogos.length >= base.length) break;
+      }
+    }
+
+    if (jogos.isEmpty) {
+      return _fechamentoRapido(modalidade, base, k, valorJogo);
+    }
+
+    return ResultadoFechamento(
+      jogos: jogos,
+      totalJogos: jogos.length,
+      custoTotal: jogos.length * valorJogo,
+      tipo: TipoFechamento.inteligente,
       numerosBase: base,
     );
   }

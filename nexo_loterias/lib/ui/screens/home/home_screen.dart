@@ -79,10 +79,17 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: primary,
-                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [primary, primary.withBlue((primary.blue + 40).clamp(0, 255))],
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(color: primary.withAlpha(80), blurRadius: 16, offset: const Offset(0, 6)),
+                  ],
                 ),
                 child: Row(
                   children: [
@@ -267,7 +274,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 12),
 
-            // Linha 4 — Palpite do Dia + Ranking
+            // Linha 4 — Bolão + Histórico de Resultados
+            Row(
+              children: [
+                Expanded(
+                  child: _ActionCard(
+                    icon: Icons.groups_rounded,
+                    label: 'Bolão',
+                    color: primary,
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.bolao),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ActionCard(
+                    icon: Icons.history_rounded,
+                    label: 'Histórico\nResultados',
+                    color: primary,
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.historicoResultados),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // Linha 5 — Palpite do Dia + Ranking
             Row(
               children: [
                 Expanded(

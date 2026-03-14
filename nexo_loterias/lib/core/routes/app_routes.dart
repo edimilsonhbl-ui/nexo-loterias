@@ -15,6 +15,9 @@ import '../../ui/screens/palpite_do_dia/palpite_do_dia_screen.dart';
 import '../../ui/screens/resultados/resultados_screen.dart';
 import '../../ui/screens/onboarding/onboarding_screen.dart';
 import '../../ui/screens/ranking/ranking_screen.dart';
+import '../../ui/screens/historico_resultados/historico_resultados_screen.dart';
+import '../../ui/screens/admin/admin_screen.dart';
+import '../../ui/screens/bolao/bolao_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -35,6 +38,9 @@ class AppRoutes {
   static const ranking = '/ranking';
   static const resultados = '/resultados';
   static const onboarding = '/onboarding';
+  static const historicoResultados = '/historico-resultados';
+  static const admin = '/admin';
+  static const bolao = '/bolao';
 
   static Map<String, WidgetBuilder> get routes => {
         splash: (_) => const SplashScreen(),
@@ -53,5 +59,8 @@ class AppRoutes {
         ranking: (_) => const RankingScreen(),
         resultados: (_) => const ResultadosScreen(),
         onboarding: (_) => const OnboardingScreen(),
+        historicoResultados: (_) => const HistoricoResultadosScreen(),
+        admin: (_) => const AdminScreen(),
+        bolao: (_) => const BolaoScreen(),
       };
 }

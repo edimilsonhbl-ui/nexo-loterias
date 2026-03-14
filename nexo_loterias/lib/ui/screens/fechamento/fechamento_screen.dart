@@ -320,6 +320,8 @@ class _SeletorTipo extends StatelessWidget {
     final opcoes = [
       (TipoFechamento.rapido, 'Rápido', Icons.bolt, 'Primeiras combinações (até 50 jogos)'),
       (TipoFechamento.equilibrado, 'Equilibrado', Icons.balance, 'Distribui altos e baixos (até 30 jogos)'),
+      (TipoFechamento.inteligente, 'Inteligente', Icons.psychology_rounded, 'Cobertura máxima com menos jogos (até 100)'),
+      (TipoFechamento.maximo, 'Máximo', Icons.all_inclusive_rounded, 'Todas as combinações possíveis (até 200 jogos)'),
       (TipoFechamento.porOrcamento, 'Por orçamento', Icons.attach_money, 'Máximo de jogos pelo valor disponível'),
     ];
 
