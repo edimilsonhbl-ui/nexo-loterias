@@ -1,49 +1,109 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
-
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint('FCM Background: ${message.notification?.title}');
-}
+import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class FcmService {
-  final _messaging = FirebaseMessaging.instance;
+  final _fcm = FirebaseMessaging.instance;
+  final _localNotif = FlutterLocalNotificationsPlugin();
 
-  Future<void> inicializar({
-    required Function(RemoteMessage) onMensagem,
-    required Function(RemoteMessage) onMensagemAberta,
-  }) async {
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  static const _channelId = 'nexo_resultados';
+  static const _channelName = 'Resultados de Loterias';
+  static const _channelDesc = 'Notificações de novos resultados e prêmios acumulados';
 
-    final settings = await _messaging.requestPermission(
+  Future<void> inicializar() async {
+    await _configurarLocalNotifications();
+    await _solicitarPermissao();
+    await _configurarHandlers();
+  }
+
+  Future<void> _configurarLocalNotifications() async {
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const settings = InitializationSettings(android: androidSettings);
+
+    await _localNotif.initialize(settings,
+        onDidReceiveNotificationResponse: (details) {
+      debugPrint('Notificação clicada: ${details.payload}');
+    });
+
+    const channel = AndroidNotificationChannel(
+      _channelId,
+      _channelName,
+      description: _channelDesc,
+      importance: Importance.high,
+      playSound: true,
+    );
+
+    await _localNotif
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+  }
+
+  Future<void> _solicitarPermissao() async {
+    await _fcm.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
-
-    debugPrint('FCM permissão: ${settings.authorizationStatus}');
-
-    FirebaseMessaging.onMessage.listen(onMensagem);
-    FirebaseMessaging.onMessageOpenedApp.listen(onMensagemAberta);
-
-    final inicial = await _messaging.getInitialMessage();
-    if (inicial != null) onMensagemAberta(inicial);
   }
 
-  Future<String?> obterToken() => _messaging.getToken();
+  Future<void> _configurarHandlers() async {
+    FirebaseMessaging.onMessage.listen((message) {
+      _mostrarNotificacaoLocal(message);
+    });
 
-  Future<void> assinarTopico(String topico) =>
-      _messaging.subscribeToTopic(topico);
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      debugPrint('App aberto via notificação: ${message.messageId}');
+    });
 
-  Future<void> cancelarTopico(String topico) =>
-      _messaging.unsubscribeFromTopic(topico);
+    final initial = await _fcm.getInitialMessage();
+    if (initial != null) {
+      debugPrint('App iniciado via notificação: ${initial.messageId}');
+    }
+  }
 
-  Future<void> assinarTopicoModalidade(String modalidadeId) =>
-      assinarTopico('resultado_$modalidadeId');
+  Future<void> _mostrarNotificacaoLocal(RemoteMessage message) async {
+    final notification = message.notification;
+    if (notification == null) return;
 
-  Future<void> assinarAcumulados() =>
-      assinarTopico('acumulados');
+    const androidDetails = AndroidNotificationDetails(
+      _channelId,
+      _channelName,
+      channelDescription: _channelDesc,
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+      largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+      styleInformation: BigTextStyleInformation(''),
+    );
 
-  Future<void> assinarNovos() =>
-      assinarTopico('novos_concursos');
+    await _localNotif.show(
+      notification.hashCode,
+      notification.title ?? 'NEXO LOTERIAS',
+      notification.body ?? '',
+      const NotificationDetails(android: androidDetails),
+      payload: message.data.toString(),
+    );
+  }
+
+  Future<void> assinarTopico(String topico) async {
+    await _fcm.subscribeToTopic(topico);
+    debugPrint('FCM: inscrito em $topico');
+  }
+
+  Future<void> cancelarTopico(String topico) async {
+    await _fcm.unsubscribeFromTopic(topico);
+    debugPrint('FCM: cancelado $topico');
+  }
+
+  Future<void> assinarTopicoModalidade(String modalidadeId) async {
+    await assinarTopico('resultados_$modalidadeId');
+  }
+
+  Future<void> assinarTopicoResultados() async {
+    await assinarTopico('resultados_todos');
+    await assinarTopico('mega_acumulada');
+  }
+
+  Future<String?> obterToken() => _fcm.getToken();
 }

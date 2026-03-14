@@ -19,7 +19,7 @@ class _EstatisticasScreenState extends State<EstatisticasScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     final modalidadeId =
         context.read<ModalidadeProvider>().modalidadeAtual.id;
     context.read<EstatisticasProvider>().carregar(modalidadeId);
@@ -49,6 +49,7 @@ class _EstatisticasScreenState extends State<EstatisticasScreen>
             Tab(text: 'Frequência'),
             Tab(text: 'Atraso'),
             Tab(text: 'Distribuição'),
+            Tab(text: 'Mapa'),
           ],
         ),
       ),
@@ -62,6 +63,7 @@ class _EstatisticasScreenState extends State<EstatisticasScreen>
                     _FrequenciaTab(stats: provider.estatisticas!),
                     _AtrasoTab(stats: provider.estatisticas!),
                     _DistribuicaoTab(stats: provider.estatisticas!),
+                    _MapaCalorTab(stats: provider.estatisticas!),
                   ],
                 ),
     );
@@ -334,6 +336,151 @@ class _Legenda extends StatelessWidget {
         Container(width: 14, height: 14, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
         Text(label, style: Theme.of(context).textTheme.bodyMedium),
+      ],
+    );
+  }
+}
+
+// ─── Mapa de Calor ───────────────────────────────────────────────────────────
+
+class _MapaCalorTab extends StatelessWidget {
+  final EstatisticasModalidade stats;
+
+  const _MapaCalorTab({required this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final numeros = stats.numeros;
+    if (numeros.isEmpty) {
+      return const Center(child: Text('Sem dados de frequência.'));
+    }
+
+    final maxFreq = numeros.map((e) => e.frequencia).reduce((a, b) => a > b ? a : b).toDouble();
+    final universo = numeros.map((e) => e.numero).reduce((a, b) => a > b ? a : b);
+    final todosNumeros = List.generate(universo, (i) => i + 1);
+    final freqMap = {for (final e in numeros) e.numero: e.frequencia};
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Mapa de Frequência',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primary)),
+          const SizedBox(height: 4),
+          const Text('Quanto mais escuro, mais sorteado',
+              style: TextStyle(fontSize: 12, color: Colors.grey)),
+          const SizedBox(height: 16),
+          _LegendaGradiente(cor: primary),
+          const SizedBox(height: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 48,
+              mainAxisSpacing: 6,
+              crossAxisSpacing: 6,
+              childAspectRatio: 1,
+            ),
+            itemCount: todosNumeros.length,
+            itemBuilder: (_, i) {
+              final n = todosNumeros[i];
+              final f = (freqMap[n] ?? 0).toDouble();
+              final intensidade = maxFreq > 0 ? f / maxFreq : 0.0;
+              final bgColor = Color.lerp(primary.withAlpha(30), primary, intensidade)!;
+              final textColor = intensidade > 0.5 ? Colors.white : primary;
+              return Container(
+                decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
+                alignment: Alignment.center,
+                child: Text(n.toString().padLeft(2, '0'),
+                    style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.w700)),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          Text('Top 10 Mais Sorteados',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: primary)),
+          const SizedBox(height: 12),
+          ..._top10(numeros, primary),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _top10(List<EstatisticaNumero> numeros, Color primary) {
+    final sorted = List<EstatisticaNumero>.from(numeros)
+      ..sort((a, b) => b.frequencia.compareTo(a.frequencia));
+    final top = sorted.take(10).toList();
+    final maxVal = top.first.frequencia;
+    return top.asMap().entries.map((entry) {
+      final rank = entry.key + 1;
+      final e = entry.value;
+      final pct = maxVal > 0 ? e.frequencia / maxVal : 0.0;
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 28,
+              child: Text('#$rank',
+                  style: TextStyle(color: primary, fontWeight: FontWeight.w700, fontSize: 12)),
+            ),
+            Container(
+              width: 32,
+              height: 32,
+              decoration:
+                  BoxDecoration(color: primary, borderRadius: BorderRadius.circular(6)),
+              alignment: Alignment.center,
+              child: Text(e.numero.toString().padLeft(2, '0'),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12)),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: pct,
+                  backgroundColor: primary.withAlpha(30),
+                  valueColor: AlwaysStoppedAnimation(primary),
+                  minHeight: 10,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text('${e.frequencia}×',
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      );
+    }).toList();
+  }
+}
+
+class _LegendaGradiente extends StatelessWidget {
+  final Color cor;
+  const _LegendaGradiente({required this.cor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Text('Menos', style: TextStyle(fontSize: 10, color: Colors.grey)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Container(
+            height: 10,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              gradient: LinearGradient(
+                colors: [cor.withAlpha(30), cor],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        const Text('Mais', style: TextStyle(fontSize: 10, color: Colors.grey)),
       ],
     );
   }

@@ -18,6 +18,7 @@ import 'providers/billing_provider.dart';
 import 'providers/ranking_provider.dart';
 import 'providers/resultados_provider.dart';
 import 'providers/tema_provider.dart';
+import 'data/services/home_widget_service.dart';
 import 'data/services/fcm_service.dart';
 import 'data/services/admob_service.dart';
 
@@ -33,16 +34,13 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await AdmobService().inicializar();
+  await HomeWidgetService.inicializar();
 
   // FCM é inicializado após o primeiro frame para evitar diálogo de permissão
   // antes da UI estar visível (experiência ruim especialmente no iOS).
   WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await _fcmService.inicializar(
-      onMensagem: _onFcmForeground,
-      onMensagemAberta: _onFcmAberta,
-    );
-    await _fcmService.assinarAcumulados();
-    await _fcmService.assinarNovos();
+    await _fcmService.inicializar();
+    await _fcmService.assinarTopicoResultados();
   });
 
   runApp(const NexoApp());

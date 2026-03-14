@@ -33,17 +33,51 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
         title: const Text('Resultados',
             style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1)),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => context.read<ResultadosProvider>().recarregar(),
-          ),
+          if (provider.sincronizando)
+            const Padding(
+              padding: EdgeInsets.all(14),
+              child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.cloud_sync_rounded),
+              tooltip: 'Sincronizar com API da Caixa',
+              onPressed: () async {
+                final ok = await context
+                    .read<ResultadosProvider>()
+                    .sincronizarComApi();
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(ok
+                      ? 'Resultados atualizados!'
+                      : 'Erro ao sincronizar. Verifique a conexão.'),
+                ));
+              },
+            ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => context.read<ResultadosProvider>().recarregar(),
+        onRefresh: () => context.read<ResultadosProvider>().sincronizarComApi(),
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (provider.ultimaSync != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.update, size: 14, color: Colors.grey),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Última sync: ${_formatarDataHoraSync(provider.ultimaSync!)}',
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
             _ResultadoCard(
               modalidade: Modalidade.porId('mega-sena'),
               concurso: provider.resultado('mega-sena'),
@@ -68,6 +102,14 @@ class _ResultadosScreenState extends State<ResultadosScreen> {
       ),
     );
   }
+}
+
+String _formatarDataHoraSync(DateTime d) {
+  final data =
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+  final hora =
+      '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+  return '$data $hora';
 }
 
 class _ResultadoCard extends StatelessWidget {
@@ -180,6 +222,9 @@ class _ResultadoCard extends StatelessWidget {
 
   String _formatarData(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+  String _formatarDataHora(DateTime d) =>
+      '${_formatarData(d)} ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
 
   String _formatarPremio(double valor) {
     if (valor >= 1000000) return 'R\$ ${(valor / 1000000).toStringAsFixed(1)} mi';
