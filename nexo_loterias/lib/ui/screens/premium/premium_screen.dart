@@ -53,11 +53,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
     final billing = context.read<BillingProvider>();
 
     if (!_isProduction) {
-      // DEV ONLY — stub
-      await PremiumService().ativarPremiumDev(
-        userId: auth.userId!,
-        plano: _planoSelecionado,
-      );
+      // DEV ONLY — atualiza estado local sem Firestore (regras bloqueiam escrita do cliente)
+      context.read<PremiumProvider>().forcarPremiumDev(
+            auth.userId!,
+            _planoSelecionado,
+          );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('[DEV] Premium ativado!')),
