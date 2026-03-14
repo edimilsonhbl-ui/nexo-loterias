@@ -242,7 +242,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 12),
 
-            // Linha 3 — Palpite do Dia + Ranking
+            // Linha 3 — Resultados + Conferidor
+            Row(
+              children: [
+                Expanded(
+                  child: _ActionCard(
+                    icon: Icons.emoji_events_rounded,
+                    label: 'Resultados',
+                    color: primary,
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.resultados),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ActionCard(
+                    icon: Icons.check_circle_outline_rounded,
+                    label: 'Conferir\nJogo',
+                    color: primary,
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.conferidor),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // Linha 4 — Palpite do Dia + Ranking
             Row(
               children: [
                 Expanded(

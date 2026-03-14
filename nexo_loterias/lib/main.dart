@@ -16,6 +16,7 @@ import 'providers/premium_provider.dart';
 import 'providers/ia_palpite_provider.dart';
 import 'providers/billing_provider.dart';
 import 'providers/ranking_provider.dart';
+import 'providers/resultados_provider.dart';
 import 'data/services/fcm_service.dart';
 import 'data/services/admob_service.dart';
 
@@ -97,6 +98,7 @@ class NexoApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => IaPalpiteProvider()),
         ChangeNotifierProvider(create: (_) => BillingProvider()),
         ChangeNotifierProvider(create: (_) => RankingProvider()),
+        ChangeNotifierProvider(create: (_) => ResultadosProvider()),
       ],
       child: Consumer<ModalidadeProvider>(
         builder: (context, modalidadeProvider, _) {

@@ -74,7 +74,6 @@ class Modalidade {
       numerosMin: 5,
       numerosMax: 15,
       faixasPremio: {5: 'Quina', 4: 'Quadra', 3: 'Terno', 2: 'Duque'},
-      disponivel: false,
     ),
     Modalidade(
       id: 'dupla-sena',
