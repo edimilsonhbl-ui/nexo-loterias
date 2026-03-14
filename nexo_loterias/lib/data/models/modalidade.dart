@@ -86,7 +86,6 @@ class Modalidade {
       numerosMin: 6,
       numerosMax: 15,
       faixasPremio: {6: 'Sena', 5: 'Quina', 4: 'Quadra', 3: 'Terno'},
-      disponivel: false,
     ),
     Modalidade(
       id: 'lotomania',
@@ -99,7 +98,6 @@ class Modalidade {
       numerosMin: 50,
       numerosMax: 50,
       faixasPremio: {20: '20 acertos', 19: '19 acertos', 18: '18 acertos', 0: '0 acertos'},
-      disponivel: false,
     ),
     Modalidade(
       id: 'timemania',

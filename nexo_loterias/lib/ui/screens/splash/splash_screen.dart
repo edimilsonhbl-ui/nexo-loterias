@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../providers/auth_provider.dart';
 
@@ -38,10 +39,18 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(const Duration(seconds: 3), _navegar);
   }
 
-  void _navegar() {
+  Future<void> _navegar() async {
     if (!mounted) return;
-    final auth = context.read<AuthProvider>();
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingConcluido = prefs.getBool('onboarding_concluido') ?? false;
 
+    if (!mounted) return;
+    if (!onboardingConcluido) {
+      Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
+      return;
+    }
+
+    final auth = context.read<AuthProvider>();
     if (auth.estaLogado) {
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {

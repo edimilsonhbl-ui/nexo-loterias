@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/tema_provider.dart';
 
 class ContaScreen extends StatefulWidget {
   const ContaScreen({super.key});
@@ -264,6 +265,7 @@ class _TelaLogado extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final temaProvider = context.watch<TemaProvider>();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Minha Conta')),
@@ -289,7 +291,32 @@ class _TelaLogado extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text('Conta ativa',
-                  style: TextStyle(color: primary, fontWeight: FontWeight.w600, fontSize: 12)),
+                  style: TextStyle(
+                      color: primary, fontWeight: FontWeight.w600, fontSize: 12)),
+            ),
+            const SizedBox(height: 32),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: SwitchListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                secondary: Icon(
+                  temaProvider.escuro
+                      ? Icons.dark_mode_rounded
+                      : Icons.light_mode_rounded,
+                  color: primary,
+                ),
+                title: Text(
+                  temaProvider.escuro ? 'Modo Escuro' : 'Modo Claro',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                value: temaProvider.escuro,
+                activeColor: primary,
+                onChanged: (_) => temaProvider.alternar(),
+              ),
             ),
             const Spacer(),
             SizedBox(
@@ -302,7 +329,8 @@ class _TelaLogado extends StatelessWidget {
                   foregroundColor: Colors.red,
                   side: const BorderSide(color: Colors.red),
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ),

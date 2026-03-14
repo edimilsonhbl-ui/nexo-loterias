@@ -13,6 +13,7 @@ import '../../ui/screens/ia_nexo/ia_nexo_screen.dart';
 import '../../ui/screens/premium/premium_screen.dart';
 import '../../ui/screens/palpite_do_dia/palpite_do_dia_screen.dart';
 import '../../ui/screens/resultados/resultados_screen.dart';
+import '../../ui/screens/onboarding/onboarding_screen.dart';
 import '../../ui/screens/ranking/ranking_screen.dart';
 
 class AppRoutes {
@@ -33,6 +34,7 @@ class AppRoutes {
   static const palpiteDoDia = '/palpite-do-dia';
   static const ranking = '/ranking';
   static const resultados = '/resultados';
+  static const onboarding = '/onboarding';
 
   static Map<String, WidgetBuilder> get routes => {
         splash: (_) => const SplashScreen(),
@@ -50,5 +52,6 @@ class AppRoutes {
         palpiteDoDia: (_) => const PalpiteDoDialScreen(),
         ranking: (_) => const RankingScreen(),
         resultados: (_) => const ResultadosScreen(),
+        onboarding: (_) => const OnboardingScreen(),
       };
 }

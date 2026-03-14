@@ -17,6 +17,7 @@ import 'providers/ia_palpite_provider.dart';
 import 'providers/billing_provider.dart';
 import 'providers/ranking_provider.dart';
 import 'providers/resultados_provider.dart';
+import 'providers/tema_provider.dart';
 import 'data/services/fcm_service.dart';
 import 'data/services/admob_service.dart';
 
@@ -99,17 +100,19 @@ class NexoApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BillingProvider()),
         ChangeNotifierProvider(create: (_) => RankingProvider()),
         ChangeNotifierProvider(create: (_) => ResultadosProvider()),
+        ChangeNotifierProvider(create: (_) => TemaProvider()),
       ],
-      child: Consumer<ModalidadeProvider>(
-        builder: (context, modalidadeProvider, _) {
+      child: Consumer2<ModalidadeProvider, TemaProvider>(
+        builder: (context, modalidadeProvider, temaProvider, _) {
           return MaterialApp(
             title: 'Nexo Loterias',
             debugShowCheckedModeBanner: false,
             navigatorKey: navigatorKey,
-            theme: modalidadeProvider.temaAtual,
+            theme: modalidadeProvider.temaAtual(dark: false),
+            darkTheme: modalidadeProvider.temaAtual(dark: true),
+            themeMode: temaProvider.themeMode,
             initialRoute: AppRoutes.splash,
             routes: AppRoutes.routes,
-            // AppStartup cuida da sincronização de auth — fora do builder
             builder: (context, child) => _AppStartup(child: child!),
           );
         },

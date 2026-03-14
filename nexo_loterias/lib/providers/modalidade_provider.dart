@@ -7,17 +7,18 @@ class ModalidadeProvider extends ChangeNotifier {
 
   Modalidade get modalidadeAtual => _modalidadeAtual;
 
-  ThemeData get temaAtual {
+  ThemeData temaAtual({bool dark = true}) {
     switch (_modalidadeAtual.tipo) {
       case TipoModalidade.megaSena:
-        return AppTheme.megaSena;
+        return dark ? AppTheme.megaSena : AppTheme.megaSenaClaro();
       case TipoModalidade.lotofacil:
-        return AppTheme.lotofacil;
+        return dark ? AppTheme.lotofacil : AppTheme.lotofacilClaro();
       default:
         return AppTheme.buildTheme(
           primary: _modalidadeAtual.corPrimaria,
           secondary: _modalidadeAtual.corSecundaria,
           destaque: _modalidadeAtual.corDestaque,
+          dark: dark,
         );
     }
   }

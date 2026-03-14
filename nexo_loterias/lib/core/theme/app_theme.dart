@@ -8,29 +8,48 @@ class AppTheme {
     required Color primary,
     required Color secondary,
     required Color destaque,
+    bool dark = true,
   }) {
+    final brightness = dark ? Brightness.dark : Brightness.light;
+    final bgColor = dark ? AppColors.background : const Color(0xFFF5F5F5);
+    final surfaceColor = dark ? AppColors.surface : Colors.white;
+    final onBgColor = dark ? AppColors.onBackground : const Color(0xFF1A1A1A);
+    final onSurfaceColor = dark ? AppColors.onSurface : const Color(0xFF333333);
+    final textSecColor = dark ? AppColors.textSecondary : const Color(0xFF757575);
+    final dividerColor = dark ? AppColors.divider : const Color(0xFFE0E0E0);
+
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.background,
-      colorScheme: ColorScheme.dark(
-        primary: primary,
-        secondary: secondary,
-        tertiary: destaque,
-        surface: AppColors.surface,
-        onPrimary: Colors.white,
-        onSecondary: primary,
-        onSurface: AppColors.onSurface,
-      ),
+      brightness: brightness,
+      scaffoldBackgroundColor: bgColor,
+      colorScheme: brightness == Brightness.dark
+          ? ColorScheme.dark(
+              primary: primary,
+              secondary: secondary,
+              tertiary: destaque,
+              surface: surfaceColor,
+              onPrimary: Colors.white,
+              onSecondary: primary,
+              onSurface: onSurfaceColor,
+            )
+          : ColorScheme.light(
+              primary: primary,
+              secondary: secondary,
+              tertiary: destaque,
+              surface: surfaceColor,
+              onPrimary: Colors.white,
+              onSecondary: primary,
+              onSurface: onSurfaceColor,
+            ),
       fontFamily: 'Poppins',
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.onBackground,
+        backgroundColor: bgColor,
+        foregroundColor: onBgColor,
         elevation: 0,
         centerTitle: true,
       ),
       cardTheme: CardThemeData(
-        color: AppColors.surface,
+        color: surfaceColor,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -54,19 +73,19 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(foregroundColor: primary),
       ),
-      dividerTheme: const DividerThemeData(
-        color: AppColors.divider,
+      dividerTheme: DividerThemeData(
+        color: dividerColor,
         thickness: 1,
       ),
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: AppColors.onBackground),
-        displayMedium: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.onBackground),
-        titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.onBackground),
-        titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.onBackground),
-        bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: AppColors.onBackground),
-        bodyMedium: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: AppColors.onSurface),
-        labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.onBackground),
-        labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
+      textTheme: TextTheme(
+        displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: onBgColor),
+        displayMedium: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: onBgColor),
+        titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: onBgColor),
+        titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: onBgColor),
+        bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: onBgColor),
+        bodyMedium: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: onSurfaceColor),
+        labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: onBgColor),
+        labelSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: textSecColor),
       ),
     );
   }
@@ -81,5 +100,19 @@ class AppTheme {
         primary: AppColors.lotofacilPrimary,
         secondary: AppColors.lotofacilSecondary,
         destaque: AppColors.lotofacilDestaque,
+      );
+
+  static ThemeData megaSenaClaro() => buildTheme(
+        primary: AppColors.megaSenaPrimary,
+        secondary: AppColors.megaSenaSecondary,
+        destaque: AppColors.megaSenaDestaque,
+        dark: false,
+      );
+
+  static ThemeData lotofacilClaro() => buildTheme(
+        primary: AppColors.lotofacilPrimary,
+        secondary: AppColors.lotofacilSecondary,
+        destaque: AppColors.lotofacilDestaque,
+        dark: false,
       );
 }
